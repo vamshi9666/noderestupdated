@@ -7,6 +7,7 @@ const mongoose = require('mongoose'); //mongodb-driver for nodejs
 
 const acceptedRoutes = require('./api/routes/acceptedroutes'); //routing to products.js
 const requestedRoutes = require('./api/routes/requestedroutes');     //routing to requests.js
+const userRoutes = require('./api/routes/user');
 
 //DATABASE CONNECTION
 mongoose.connect('mongodb+srv://vamshik:' + "vk12po34" +'@nodejstest-3bfyd.mongodb.net/test?retryWrites=true&w=majority');
@@ -33,6 +34,7 @@ app.use((req,res,next) => {
 //Routes handling requests
 app.use('/acceptedroutes',acceptedRoutes);
 app.use('/requestedroutes',requestedRoutes);
+app.use('/user',userRoutes);
 
 
 //Route against intended url (invalid url)
