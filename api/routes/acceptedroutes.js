@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const checkAuth = require('../middleware/check-auth');
 const {successRes,failRes } = require('./../utils')//
 const Route = require('../models/route');
 //HANDLING DIFFERENT URL REQUESTS
@@ -23,7 +24,7 @@ router.get('/', (req, res, next) => {
 })
 
 
-router.post('/', (req, res, next) => {
+router.post('/',checkAuth,(req, res, next) => {
     //uncomment for demo http request
     /* const acceptroute = {
         name :req.body.name,
@@ -55,9 +56,10 @@ router.post('/', (req, res, next) => {
                 }
             }
         })
-            .catch(err => console.log(err));
+        
 
-    });
+    })
+    .catch(err => console.log(err));
 });
 router.get('/:routeId', (req, res, next) => {
     const id = req.params.routeId;
