@@ -1,106 +1,100 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../constants");
 
-const User = require('../models/user');
+const User = require("../models/user");
 
-router.post('/signup',(req,res,next)=>{
-    User.find({email: req.body.email})
-    .exec()
-    .then(user =>{
-        if(user.length>=1){
-            return res.status(409).json({
-                message: "mail already exists"
-            });
+router.post("/signup", async (req, res) => {
+  try {
+    const existingUser = await User.findOne({ email: req.body.email });
+
+    if (existingUser) {
+      return res.status(409).json({
+        message: "mail already exists"
+      });
+    }
+    bcrypt.hash(req.body.password, 10, async (err, hash) => {
+      try {
+        if (err) {
+          return res.status(500).json({
+            error: err
+          });
         }
-        else{
-            bcrypt.hash(req.body.password,10,(err,hash)=>{
-                if(err){
-                     return res.status(500).json({
-                         error: err
-                     });
-                }    
-                 else {
-                    const user = new User({
-                        _id: mongoose.Types.ObjectId(),
-                        email: req.body.email,
-                       password: hash     //hashing password with 10 rounds of added salt
-                    });
-                    user
-                    .save()
-                    .then(result =>{
-                        console.log(result);
-                        res.status(201).json({
-                            message: 'User created '
-                        });
-                    })
-                    .catch(err =>{
-                        console.log(err);
-                    res.status(500).json({error: err});
-                    });
-                 }    
-            })
-        }
-
-    })
-   
-     
-   
-});
-router.post('/login',(req,res,next)=> {
-    User.find({email: req.body.email})
-    .exec()
-    .then(user =>{
-        if(user.length<1){
-            return res.status(401).json({
-                message: 'Authentication failed'
-            });
-        }
-        bcrypt.compare(req.body.password, user[0].password,(err,result)=>{
-            if(err){
-                return res.status(401).json({
-                    message: 'Authentication failed'
-                });
-            }
-            if(result){
-               const token= jwt.sign({
-                    email: user[0].email,
-                    usrId: user[0]._id
-                },
-                "Afour",
-                {
-                    expiresIn: "1h"
-                }
-
-                );
-                return res.status(200).json({
-                    message: "Authorized user",
-                    token: token
-                });
-
-            }
-            return res.status(401).json({
-                message: 'Authentication failed' });
+        const user = new User({
+          _id: mongoose.Types.ObjectId(),
+          email: req.body.email,
+          password: hash
         });
-    })
-    .catch(err =>{
-        console.log(err);
-    res.status(500).json({error: err});
+        const newUser = await user.save();
+        const token = jwt.sign(
+          {
+            usrId: newUser._id,
+            email: newUser.email
+          },
+          JWT_SECRET,
+          {
+            expiresIn: "7d"
+          }
+        );
+        delete newUser.password;
+        res.status(201).json({
+          message: "User created ",
+          token,
+          user: newUser
+        });
+      } catch (e) {
+        res.status(500).json(e);
+      }
     });
+  } catch (e) {
+    res.status(500).json(e);
+  }
 });
-router.delete('/:userId',(req,res,next)=>{
-    User.remove({_id:req.params.userId})
+router.post("/login", (req, res, next) => {
+  const { email, password } = req.body;
+  User.findOne({ email })
     .exec()
-    .then(result=>{
-        res.status(200).json({
-            message: "user deleted"
+    .then(user => {
+      if (!user) {
+        return res.status(404).json({
+          message: "User not found"
         });
+      }
+      bcrypt.compare(password, user.password, (err, result) => {
+        if (err) {
+          return res.status(401).json({
+            message: "Authentication failed"
+          });
+        }
+        if (result) {
+          delete user.password;
+          const token = jwt.sign(
+            {
+              email: user.email,
+              usrId: user._id
+            },
+            JWT_SECRET,
+            {
+              expiresIn: "7d"
+            }
+          );
+          return res.status(200).json({
+            message: "Authorized user",
+            token: token,
+            user: { user, password: null }
+          });
+        }
+        return res.status(401).json({
+          message: "Authentication failed"
+        });
+      });
     })
-    .catch(err =>{
-        console.log(err);
-    res.status(500).json({error: err});
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ error: err });
     });
 });
 
