@@ -38,8 +38,8 @@ app.use((req, res, next) => {
 //Routes handling requests
 app.use("/existing_routes", authMiddleware, acceptedRoutes);
 app.use("/requested_routes" 
-// , 
-// authMiddleware
+ , 
+ authMiddleware
 , requestedRoutes);
 app.use("/user", userRoutes);
 
