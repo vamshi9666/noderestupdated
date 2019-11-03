@@ -25,7 +25,8 @@ router.post("/", checkAuth, (req, res, next) => {
     _id: new mongoose.Types.ObjectId(),
     destination: req.body.destination,
     route_index: req.body.route_index,
-    no_seats: req.body.no_seats
+    no_seats: req.body.no_seats,
+    ...req.body
   });
   route
     .save()
@@ -46,6 +47,7 @@ router.post("/", checkAuth, (req, res, next) => {
       });
     })
     .catch(err => console.log(err));
+
 });
 router.get("/:routeId", (req, res, next) => {
   const id = req.params.routeId;
@@ -115,5 +117,6 @@ router.delete("/:routeId", (req, res, next) => {
       });
     });
 });
+
 
 module.exports = router;

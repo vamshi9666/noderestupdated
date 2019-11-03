@@ -3,6 +3,7 @@ const app = express(); //creating express object as app
 const morgan = require("morgan"); //monitors the req/res transfer details
 const bodyParser = require("body-parser"); //parses the content according to specifics
 const mongoose = require("mongoose"); //mongodb-driver for nodejs
+const cors  = require("cors")
 
 const acceptedRoutes = require("./api/routes/acceptedroutes"); //routing to products.js
 const requestedRoutes = require("./api/routes/requestedroutes"); //routing to requests.js
@@ -18,7 +19,7 @@ mongoose.connect(
 app.use(morgan("dev")); //using morgan before handling requests (In dev)
 app.use(bodyParser.urlencoded({ extended: false })); //parse simple URL encoded data
 app.use(bodyParser.json()); //extracts json data for readability
-
+app.use(cors())
 //CORS access to api(diasbling security)
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*"); //access to everyone(*)
@@ -36,7 +37,10 @@ app.use((req, res, next) => {
 
 //Routes handling requests
 app.use("/existing_routes", authMiddleware, acceptedRoutes);
-app.use("/requested_routes", authMiddleware, requestedRoutes);
+app.use("/requested_routes" 
+// , 
+// authMiddleware
+, requestedRoutes);
 app.use("/user", userRoutes);
 
 app.post("/legacy", authMiddleware, async (req, res) => {

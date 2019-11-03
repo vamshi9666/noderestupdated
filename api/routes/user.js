@@ -9,7 +9,7 @@ const User = require("../models/user");
 
 router.post("/signup", async (req, res) => {
   try {
-    const existingUser = await User.findOne({ email: req.body.email });
+    const existingUser = await User.findOne({...req.body });
 
     if (existingUser) {
       return res.status(409).json({

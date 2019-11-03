@@ -12,7 +12,7 @@ router.get("/", (req, res, next) => {
   /* res.status(200).json({
         message :'requests were fetched'
     });*/
-  Requested.find()
+  Request.find()
     // .select('_id Distance_to_route route')
     .populate("route") //grabbing detailed route(add second arg to filter the details)
     .exec()
@@ -40,7 +40,14 @@ router.get("/", (req, res, next) => {
 });
 router.post("/", async (req, res, next) => {
   try {
+    console.log(" i am here ")
     const { body } = req;
+    const { routeId } = body;
+     const route = await Route.findById(routeId);
+     route.no_seats = route.no_seats -1 ;
+     route.save()
+    
+    // { $set:{   no_seats: 2300 } })
     const newRequest = new Request({ _id: mongoose.Types.ObjectId(), ...body });
     const createdRequest = await newRequest.save();
     res
@@ -48,6 +55,7 @@ router.post("/", async (req, res, next) => {
       .json(successRes(200, createdRequest, "newly created request for route"));
   } catch (e) {
     res.status(500).json(failRes(500, e, "error in " + e));
+    console.log(e)
   }
   // Route.findById(req.body.routeId)
   //   .then(route => {
