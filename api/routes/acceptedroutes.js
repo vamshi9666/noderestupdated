@@ -83,12 +83,8 @@ router.patch("/:routeId", (req, res, next) => {
   //static update (must fill all the fields even when not necessary)
   // Route.update({_id : id}, { $set: {name:req.body.newName, price:req.body.newPrice}})
   //dynamic update for eirther of the properties
-  const updateOp = {};
-  for (const ops of req.body) {
-    //checking for available update requests in the body
-    updateOp[ops.propName] = ops.value;
-  }
-  Route.update({ _id: id }, { $set: updateOp })
+
+  Route.findByIdAndUpdate(id, { $set: body })
     .exec()
     .then(result => {
       console.log(result);
@@ -99,6 +95,7 @@ router.patch("/:routeId", (req, res, next) => {
       res.status(500).json({ error: err });
     });
 });
+
 router.delete("/:routeId", (req, res, next) => {
   /* res.status(200).json({
          message: 'Deleted product'
