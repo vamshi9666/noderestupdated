@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 
 //Routes handling requests
 app.use("/existing_routes", authMiddleware, acceptedRoutes);
-app.use("/requested_routes", authMiddleware, requestedRoutes);
+app.use("/requested_routes", requestedRoutes);
 app.use("/user", userRoutes);
 app.use("/admin", adminRoutes);
 

@@ -6,7 +6,7 @@ const requestSchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId, //uncomment to add constraints on writing values
   routeId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Route",
+    ref: "route",
     required: true
   },
   studentId: {
