@@ -14,39 +14,39 @@ router.get("/", (req, res, next) => {
     });*/
   Request.find()
     // .select('_id Distance_to_route route')
-    .populate("route") //grabbing detailed route(add second arg to filter the details)
+    .populate("routeId") //grabbing detailed route(add second arg to filter the details)
     .exec()
     .then(docs => {
       res.status(200).json({
         count: docs.length,
-        requests: docs.map(doc => {
-          return {
-            _id: doc._id,
-            route: doc.route,
-            studentId: doc.studentId,
-            studentName: doc.studentName,
-            location: doc.location,
-            request: {
-              type: "GET",
-              url: "http://localhost:3000/requestedroutes/" + doc._id
-            }
-          };
-        })
+        orders: docs
       });
     })
     .catch(err => {
       res.status(500).json({ error: err });
     });
 });
+
+router.get("/route/:routeId", async (req, res) => {
+  try {
+    const requests = await Request.find({
+      routeId: req.params.routeId
+    }).populate("studentId");
+    res.status(200).json(successRes(200, requests, ""));
+  } catch (error) {
+    res.status(500).json(failRes(500, {}, "error >>>" + error));
+  }
+});
+
 router.post("/", async (req, res, next) => {
   try {
-    console.log(" i am here ")
+    console.log(" i am here ");
     const { body } = req;
     const { routeId } = body;
-     const route = await Route.findById(routeId);
-     route.no_seats = route.no_seats -1 ;
-     route.save()
-    
+    const route = await Route.findById(routeId);
+    route.no_seats = route.no_seats - 1;
+    route.save();
+
     // { $set:{   no_seats: 2300 } })
     const newRequest = new Request({ _id: mongoose.Types.ObjectId(), ...body });
     const createdRequest = await newRequest.save();
@@ -55,7 +55,7 @@ router.post("/", async (req, res, next) => {
       .json(successRes(200, createdRequest, "newly created request for route"));
   } catch (e) {
     res.status(500).json(failRes(500, e, "error in " + e));
-    console.log(e)
+    console.log(e);
   }
   // Route.findById(req.body.routeId)
   //   .then(route => {
