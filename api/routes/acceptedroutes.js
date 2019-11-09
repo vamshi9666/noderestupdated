@@ -79,8 +79,8 @@ router.patch("/:routeId", (req, res, next) => {
       });
       */
   const id = req.params.routeId;
-
-  //static update (must fill all the fields even when not necessary)
+const { body } = req
+//static update (must fill all the fields even when not necessary)
   // Route.update({_id : id}, { $set: {name:req.body.newName, price:req.body.newPrice}})
   //dynamic update for eirther of the properties
 
