@@ -9,7 +9,7 @@ const User = require("../models/user");
 
 router.post("/signup", async (req, res) => {
   try {
-    const existingUser = await User.findOne({...req.body });
+    const existingUser = await User.findOne({ email: req.body.email });
 
     if (existingUser) {
       return res.status(409).json({
@@ -26,7 +26,8 @@ router.post("/signup", async (req, res) => {
         const user = new User({
           _id: mongoose.Types.ObjectId(),
           email: req.body.email,
-          password: hash
+          password: hash,
+          ...req.body
         });
         const newUser = await user.save();
         const token = jwt.sign(
